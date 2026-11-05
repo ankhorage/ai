@@ -7,6 +7,7 @@ import { doctor } from './commands/doctor.js';
 import { init } from './commands/init.js';
 import { inventory } from './commands/inventory.js';
 import { mcp } from './commands/mcp.js';
+import { plugins } from './commands/plugins.js';
 import { rollback } from './commands/rollback.js';
 import { status } from './commands/status.js';
 import { sync } from './commands/sync.js';
@@ -43,8 +44,9 @@ export async function runCliAsync(argv: readonly string[], context: AiCliContext
         return await mcp(root, rest, output);
       case 'bmad':
         return await bmad(root, rest, output);
-      case 'skills':
       case 'plugins':
+        return await plugins(root, rest, output);
+      case 'skills':
       case 'hooks':
         return await inventory(root, command, output);
       case 'plan':
