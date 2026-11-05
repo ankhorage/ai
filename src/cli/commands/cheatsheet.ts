@@ -65,5 +65,6 @@ const COMMANDS = [
     ['plugins install claude-code plugin@marketplace --approve', 'Install approved project-scoped Claude plugin'],
     ['plugins install gemini https://github.com/owner/repo --approve', 'Install approved Gemini extension'],
   ['hooks', 'Inspect native hook configuration'],
+  ['hooks enable --approve', 'Register approved Claude/Gemini SessionStart guidance'],
   ['cheatsheet', 'This command (--format json|markdown)'],
 ];

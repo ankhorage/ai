@@ -8,3 +8,4 @@ dist/
 .ankh/ai/backups/
 .ankh/ai/mcp-backups/
 .ankh/ai/plans/
+.ankh/ai/hook-backups/

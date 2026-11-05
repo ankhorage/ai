@@ -5,6 +5,7 @@ import { bmad } from './commands/bmad.js';
 import { cheatsheet } from './commands/cheatsheet.js';
 import { doctor } from './commands/doctor.js';
 import { init } from './commands/init.js';
+import { hooks } from './commands/hooks.js';
 import { inventory } from './commands/inventory.js';
 import { mcp } from './commands/mcp.js';
 import { plugins } from './commands/plugins.js';
@@ -47,8 +48,9 @@ export async function runCliAsync(argv: readonly string[], context: AiCliContext
       case 'plugins':
         return await plugins(root, rest, output);
       case 'skills':
-      case 'hooks':
         return await inventory(root, command, output);
+      case 'hooks':
+        return await hooks(root, rest, output);
       case 'plan':
       case 'execute':
       case 'review':
