@@ -28,7 +28,7 @@ test('setup is idempotent and refuses unmanaged user edits', async () => {
   const root = await mkdtemp(join(tmpdir(), 'ankh-ai-test-'));
   try {
     const artifacts = buildManagedArtifacts(config);
-    expect(artifacts.length).toBe(7);
+    expect(artifacts.length).toBe(8);
     expect(
       (await applyManagedArtifactsAsync(root, artifacts, true)).every(
         (change) => change.action === 'create',

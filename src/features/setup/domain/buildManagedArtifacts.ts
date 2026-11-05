@@ -20,14 +20,15 @@ export function buildManagedArtifacts(config: AiConfig): readonly ManagedArtifac
     },
     {
       path: '.ankh/ai/hooks/session-start.ts',
-      content: [
-        "const message = 'Read AGENTS.md and select the relevant .agents/skills/ before editing any project files.';",
-        "if (process.argv.includes('--gemini')) {",
-        "  console.log(JSON.stringify({ hookSpecificOutput: { hookEventName: 'SessionStart', additionalContext: message } }));",
-        "} else {",
-        "  console.log(message);",
-        "}",
-      ].join('\\n') + '\\n',
+      content:
+        [
+          "const message = 'Read AGENTS.md and select the relevant .agents/skills/ before editing any project files.';",
+          "if (process.argv.includes('--gemini')) {",
+          "  console.log(JSON.stringify({ hookSpecificOutput: { hookEventName: 'SessionStart', additionalContext: message } }));",
+          '} else {',
+          '  console.log(message);',
+          '}',
+        ].join('\n') + '\n',
     },
     ...config.agents.flatMap((agent) =>
       commands.map((command) => buildCommandArtifact(agent, command)),

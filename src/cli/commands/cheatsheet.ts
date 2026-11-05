@@ -62,8 +62,14 @@ const COMMANDS = [
   ['bmad status', 'Inspect installed BMAD runtime'],
   ['bmad party', 'Instructions to launch upstream native Party Mode'],
   ['plugins', 'Inspect installed plugin configuration'],
-    ['plugins install claude-code plugin@marketplace --approve', 'Install approved project-scoped Claude plugin'],
-    ['plugins install gemini https://github.com/owner/repo --approve', 'Install approved Gemini extension'],
+  [
+    'plugins install claude-code plugin@marketplace --approve',
+    'Install approved project-scoped Claude plugin',
+  ],
+  [
+    'plugins install gemini https://github.com/owner/repo --approve',
+    'Install approved Gemini extension',
+  ],
   ['hooks', 'Inspect native hook configuration'],
   ['hooks enable --approve', 'Register approved Claude/Gemini SessionStart guidance'],
   ['cheatsheet', 'This command (--format json|markdown)'],

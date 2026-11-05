@@ -4,7 +4,11 @@ import { planPluginInstall } from './planPluginInstall.js';
 
 test('plans native Claude plugin installation at project scope', () => {
   expect(planPluginInstall('claude-code', 'reviewer@official').argv).toEqual([
-    'plugin', 'install', 'reviewer@official', '--scope', 'project',
+    'plugin',
+    'install',
+    'reviewer@official',
+    '--scope',
+    'project',
   ]);
 });
 
