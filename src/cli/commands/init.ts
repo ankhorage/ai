@@ -10,7 +10,7 @@ import { writeConfigAsync } from '../../features/config/adapters/writeConfigAsyn
 import { applyManagedArtifactsAsync } from '../../features/setup/application/applyManagedArtifactsAsync.js';
 import { inspectManagedArtifactsAsync } from '../../features/setup/application/inspectManagedArtifactsAsync.js';
 import { buildManagedArtifacts } from '../../features/setup/domain/buildManagedArtifacts.js';
-import type { AgentId, AiConfig, WorkflowId } from '../../types/ai.js';
+import type { AgentId, AiConfig, SetupChange, WorkflowId } from '../../types/ai.js';
 
 interface SetupSelection {
   readonly agents: readonly AgentId[];
@@ -147,4 +147,11 @@ function parseAgents(value: string): AgentId[] {
     if (agent === undefined) throw new Error('Invalid agent selection: ' + name);
     return agent.id;
   });
+}
+
+/*** Show project evidence and proposed file writes before requesting consent. */
+function showSetupPreview(output: (text: string) => void, config: AiConfig, changes: readonly SetupChange[]): void {
+  output('Project: ' + config.project.name + ' [' + config.project.languages.join(', ') + ']\\n');
+  output('Agents: ' + config.agents.join(', ') + ' | Workflow: ' + config.workflow + '\\n');
+  changes.forEach((change) => output('  ' + change.action + ' ' + change.path + '\\n'));
 }

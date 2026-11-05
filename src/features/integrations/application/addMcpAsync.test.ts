@@ -57,13 +57,10 @@ test('rejects URL credentials and insecure transports', async () => {
       (reason: unknown) => String(reason),
     );
     expect(insecure).toContain('HTTPS');
-    const credentials = await addMcpAsync(
-      root,
-      config,
-      'docs',
-      '***example.com',
-      false,
-    ).then(
+    const credentialedUrl = new URL('https://example.com');
+    credentialedUrl.username = 'someone';
+    credentialedUrl.password = 'secret';
+    const credentials = await addMcpAsync(root, config, 'docs', credentialedUrl.href, false).then(
       () => null,
       (reason: unknown) => String(reason),
     );

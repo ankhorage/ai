@@ -8,7 +8,38 @@ export async function cheatsheet(
   output: (text: string) => void,
 ): Promise<number> {
   const config = await readConfigAsync(root);
-  const commands = [
+
+  const data = {
+    workflow: config?.workflow ?? null,
+    agents: agentCatalog.filter((agent) => config?.agents.includes(agent.id) ?? true),
+    commands: COMMANDS.map(([command, description]) => ({
+      command: 'ankh ai ' + command,
+      description,
+    })),
+  };
+  const format = argv.includes('--format') ? argv[argv.indexOf('--format') + 1] : 'text';
+  if (format === 'json') output(JSON.stringify(data, null, 2) + '\n');
+  else if (format === 'markdown')
+    output(
+      '# Ankh AI Cheatsheet\n\n' +
+        data.commands
+          .map((command) => '- `' + command.command + '` — ' + command.description)
+          .join('\n') +
+        '\n',
+    );
+  else
+    output(
+      'Ankhorage AI commands\n' +
+        data.commands
+          .map((command) => command.command.padEnd(33) + command.description)
+          .join('\n') +
+        '\n',
+    );
+  return 0;
+}
+
+/*** Canonical command names and descriptions shared by terminal and export formats. */
+const COMMANDS = [
     ['init', 'Interactive setup (--yes, --dry-run, --agents, --workflow)'],
     ['sync', 'Reconcile AI-owned agent command files (--dry-run)'],
     ['rollback', 'Revert latest AI-managed setup changes'],
@@ -34,31 +65,3 @@ export async function cheatsheet(
     ['hooks', 'Inspect native hook configuration'],
     ['cheatsheet', 'This command (--format json|markdown)'],
   ];
-  const data = {
-    workflow: config?.workflow ?? null,
-    agents: agentCatalog.filter((agent) => config?.agents.includes(agent.id) ?? true),
-    commands: commands.map(([command, description]) => ({
-      command: 'ankh ai ' + command,
-      description,
-    })),
-  };
-  const format = argv.includes('--format') ? argv[argv.indexOf('--format') + 1] : 'text';
-  if (format === 'json') output(JSON.stringify(data, null, 2) + '\n');
-  else if (format === 'markdown')
-    output(
-      '# Ankh AI Cheatsheet\n\n' +
-        data.commands
-          .map((command) => '- `' + command.command + '` — ' + command.description)
-          .join('\n') +
-        '\n',
-    );
-  else
-    output(
-      'Ankhorage AI commands\n' +
-        data.commands
-          .map((command) => command.command.padEnd(33) + command.description)
-          .join('\n') +
-        '\n',
-    );
-  return 0;
-}

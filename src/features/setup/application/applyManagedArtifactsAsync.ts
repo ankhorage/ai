@@ -21,30 +21,7 @@ export async function applyManagedArtifactsAsync(
   const updated = Object.fromEntries(
     artifacts.map((artifact) => [artifact.path, hashArtifact(artifact.content)]),
   );
-  const backupId = new Date().toISOString().replace(/[:.]/g, '-') + '-' + randomUUID();
-  const backupRoot = join(root, '.ankh/ai/backups', backupId);
-  await mkdir(backupRoot, { recursive: true });
-  const previous = changes.filter((change) => change.action === 'update');
-  await Promise.all(
-    previous.map(async (change) => {
-      const source = await assertSafePathAsync(root, change.path);
-      const target = join(backupRoot, change.path);
-      await mkdir(dirname(target), { recursive: true });
-      await writeFile(target, await readFile(source));
-    }),
-  );
-  await writeFile(
-    join(backupRoot, 'previous.json'),
-    JSON.stringify(
-      {
-        schemaVersion: 1,
-        files: existing.files,
-        changes,
-      },
-      null,
-      2,
-    ) + '\n',
-  );
+  await backupPreviousFilesAsync(root, changes, existing.files);
   for (const artifact of artifacts) {
     const change = changes.find((item) => item.path === artifact.path);
     if (change?.action === 'unchanged') continue;
@@ -64,4 +41,27 @@ export async function applyManagedArtifactsAsync(
   );
   await rename(temporary, managedPath);
   return changes;
+}
+
+/*** Backup only previously managed files before any overwrite. */
+async function backupPreviousFilesAsync(
+  root: string,
+  changes: readonly SetupChange[],
+  hashes: Readonly<Record<string, string>>,
+): Promise<void> {
+  const backupId = new Date().toISOString().replace(/[:.]/g, '-') + '-' + randomUUID();
+  const backupRoot = join(root, '.ankh/ai/backups', backupId);
+  await mkdir(backupRoot, { recursive: true });
+  const previous = changes.filter((change) => change.action === 'update');
+  await Promise.all(previous.map(async (change) => {
+    const source = await assertSafePathAsync(root, change.path);
+    const target = join(backupRoot, change.path);
+    await mkdir(dirname(target), { recursive: true });
+    await writeFile(target, await readFile(source));
+  }));
+  await writeFile(join(backupRoot, 'previous.json'), JSON.stringify({
+    schemaVersion: 1,
+    files: hashes,
+    changes,
+  }, null, 2) + '\\n');
 }
