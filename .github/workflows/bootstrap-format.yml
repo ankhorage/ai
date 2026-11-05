@@ -22,5 +22,6 @@ jobs:
           const fs=require("node:fs"),cp=require("node:child_process");
           const files=cp.execFileSync("git",["diff","--name-only"],{encoding:"utf8"}).split(String.fromCharCode(10)).filter(Boolean);
           for(const path of files){console.log("ANKH_FORMATTED "+JSON.stringify({path,content:fs.readFileSync(path,"utf8")}));}
+          if(fs.existsSync("bun.lock")) console.log("ANKH_FORMATTED "+JSON.stringify({path:"bun.lock",content:fs.readFileSync("bun.lock","utf8")}));
           console.log("ANKH_FORMATTED_COUNT "+files.length);
           '
