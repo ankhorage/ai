@@ -19,7 +19,8 @@
     "types": [
       "node",
       "bun"
-    ]
+    ],
+    "noUncheckedIndexedAccess": true
   },
   "include": [
     "src/**/*.ts"

@@ -14,14 +14,14 @@ const provider = {
   category: 'ai',
   version: metadata.version,
   capabilities: names.map((name) => ({
-    id: 'ai.' + name,
+    id: `ai.${name}` as const,
     owner: '@ankhorage/ai',
     access: ['invoke'] as const,
     binding: { kind: 'action' as const, bindableAs: ['target'] as const },
     label: 'AI ' + name,
     description: 'Ankhorage AI ' + name,
   })),
-  commands: names.map((name) => ({ path: [name], capability: 'ai.' + name, summary: 'Ankhorage AI ' + name })),
+  commands: names.map((name) => ({ path: [name], capability: `ai.${name}` as const, summary: 'Ankhorage AI ' + name })),
   handlers: names.map((name) => ({
     path: [name],
     handler: async (request: { argv: readonly string[]; context: { cwd: string; writeStdout(text: string): void; writeStderr(text: string): void } }) =>

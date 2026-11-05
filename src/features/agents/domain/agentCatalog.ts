@@ -31,7 +31,7 @@ export const agentCatalog = [
     displayName: 'Gemini CLI',
     binary: 'gemini',
     interactive: true,
-    execution: 'supported',
+    execution: 'unsupported',
     features: ['commands', 'mcp', 'hooks'],
   },
 ] as const satisfies readonly AgentDescriptor[];

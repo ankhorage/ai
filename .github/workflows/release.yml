@@ -1,0 +1,40 @@
+name: Release (manual)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: https://registry.npmjs.org
+      - run: bun install
+      - run: bun run build
+      - run: bun run check-types
+      - run: bun run lint
+      - run: bun run knip:check
+      - run: bun run test
+      - run: bun run format:check
+      - name: Version from Changesets
+        run: bun run version-packages
+      - name: Generate release documentation
+        run: bun run docs
+      - name: Publish with npm trusted publishing
+        run: npm publish --access public --provenance --ignore-scripts
+        env:
+          NODE_AUTH_TOKEN: ''

@@ -15,7 +15,7 @@ export async function applyManagedArtifactsAsync(root: string, artifacts: readon
   if (changes.some((change) => change.action === 'conflict')) return changes;
   const existing = await readManagedRecordAsync(root);
   const updated = Object.fromEntries(artifacts.map((artifact) => [artifact.path, hashArtifact(artifact.content)]));
-  const backupId = randomUUID();
+  const backupId = new Date().toISOString().replace(/[:.]/g, '-') + '-' + randomUUID();
   const backupRoot = join(root, '.ankh/ai/backups', backupId);
   await mkdir(backupRoot, { recursive: true });
   const previous = changes.filter((change) => change.action === 'update');

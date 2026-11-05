@@ -23,7 +23,12 @@ export async function inventory(
     output((exists ? 'present ' : 'missing ') + path + '\n');
   }
   for (const agent of agentCatalog.filter((item) => config.agents.includes(item.id)))
-    output(agent.id + ': ' + (agent.features.includes(kind === 'skills' ? 'skills' : kind === 'plugins' ? 'plugins' : kind === 'hooks' ? 'hooks' : 'mcp') ? 'platform supports capability' : 'not declared') + '\n');
+    output(agent.id + ': ' + (supports(agent.features, kind) ? 'platform supports capability' : 'not declared') + '\n');
   output('No remote installations were performed. Review each provider configuration and trust permissions separately.\n');
   return 0;
+}
+
+/*** Check a provider feature from a common readonly string vocabulary. */
+function supports(features: readonly string[], kind: string): boolean {
+  return features.includes(kind);
 }

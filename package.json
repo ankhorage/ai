@@ -69,6 +69,21 @@
         "description": "Ankhorage AI sync command"
       },
       {
+        "id": "ai.rollback",
+        "owner": "@ankhorage/ai",
+        "access": [
+          "invoke"
+        ],
+        "binding": {
+          "kind": "action",
+          "bindableAs": [
+            "target"
+          ]
+        },
+        "label": "AI rollback",
+        "description": "Ankhorage AI rollback command"
+      },
+      {
         "id": "ai.status",
         "owner": "@ankhorage/ai",
         "access": [
@@ -264,6 +279,21 @@
         "description": "Ankhorage AI hooks command"
       },
       {
+        "id": "ai.bmad",
+        "owner": "@ankhorage/ai",
+        "access": [
+          "invoke"
+        ],
+        "binding": {
+          "kind": "action",
+          "bindableAs": [
+            "target"
+          ]
+        },
+        "label": "AI bmad",
+        "description": "Ankhorage AI bmad command"
+      },
+      {
         "id": "ai.cheatsheet",
         "owner": "@ankhorage/ai",
         "access": [
@@ -292,7 +322,8 @@
     "changeset": "ankhorage-changeset",
     "changeset:status": "ankhorage-changeset status --since=origin/main",
     "docs": "bunx @ankhorage/paradox",
-    "version-packages": "ankhorage-changeset version"
+    "version-packages": "ankhorage-changeset version",
+    "test:standalone": "bun test src/features/setup"
   },
   "dependencies": {
     "@ankhorage/project-detector": "^0.3.5",

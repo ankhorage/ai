@@ -5,3 +5,6 @@ dist/
 !.env.example
 .ankh/ai/runs/
 .ankh/ai/reviews/
+.ankh/ai/backups/
+.ankh/ai/mcp-backups/
+.ankh/ai/plans/
