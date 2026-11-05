@@ -59,11 +59,7 @@ export async function init(
     output(
       'Canonical AGENTS.md and shared repository skills remain owned by @ankhorage/devtools.\n',
     );
-    if (config.workflow === 'bmad') {
-      output(
-        'BMAD selected. Install upstream BMAD explicitly via ankh ai bmad install --approve.\n',
-      );
-    }
+    reportMethodology(output, config.workflow);
     return 0;
   } finally {
     ui?.close();
@@ -156,4 +152,10 @@ function showSetupPreview(
   output('Project: ' + config.project.name + ' [' + config.project.languages.join(', ') + ']\\n');
   output('Agents: ' + config.agents.join(', ') + ' | Workflow: ' + config.workflow + '\\n');
   changes.forEach((change) => output('  ' + change.action + ' ' + change.path + '\\n'));
+}
+
+/*** Report upstream methodology installation requirements without pretending it ran. */
+function reportMethodology(output: (text: string) => void, workflow: WorkflowId): void {
+  if (workflow !== 'bmad') return;
+  output('BMAD selected. Install upstream BMAD explicitly via ankh ai bmad install --approve.\\n');
 }
