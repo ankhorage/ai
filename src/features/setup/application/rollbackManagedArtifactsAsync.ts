@@ -1,6 +1,6 @@
-import { readdir, readFile, rm, rename, writeFile, mkdir } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
 import { randomUUID } from 'node:crypto';
+import { mkdir, readdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
 
 import type { SetupChange } from '../../../types/ai.js';
 import { assertSafePathAsync } from '../adapters/assertSafePathAsync.js';
@@ -21,7 +21,8 @@ export async function rollbackManagedArtifactsAsync(root: string): Promise<strin
     if (change.action === 'unchanged') continue;
     const target = await assertSafePathAsync(root, change.path);
     const current = await readFile(target, 'utf8');
-    if (record.files[change.path] !== hashArtifact(current)) throw new Error('Cannot roll back modified file: ' + change.path);
+    if (record.files[change.path] !== hashArtifact(current))
+      throw new Error('Cannot roll back modified file: ' + change.path);
   }
   for (const change of raw.changes) {
     const target = await assertSafePathAsync(root, change.path);
@@ -40,9 +41,24 @@ export async function rollbackManagedArtifactsAsync(root: string): Promise<strin
 }
 
 /*** Validate backup metadata before interpreting any paths. */
-function isBackup(value: unknown): value is { readonly files: Record<string, string>; readonly changes: SetupChange[] } {
-  return typeof value === 'object' && value !== null && 'files' in value && typeof value.files === 'object' &&
-    'changes' in value && Array.isArray(value.changes) && value.changes.every((change: unknown) =>
-      typeof change === 'object' && change !== null && 'path' in change && typeof change.path === 'string' &&
-      'action' in change && ['create', 'update', 'unchanged'].includes(String(change.action)));
+function isBackup(
+  value: unknown,
+): value is { readonly files: Record<string, string>; readonly changes: SetupChange[] } {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'files' in value &&
+    typeof value.files === 'object' &&
+    'changes' in value &&
+    Array.isArray(value.changes) &&
+    value.changes.every(
+      (change: unknown) =>
+        typeof change === 'object' &&
+        change !== null &&
+        'path' in change &&
+        typeof change.path === 'string' &&
+        'action' in change &&
+        ['create', 'update', 'unchanged'].includes(String(change.action)),
+    )
+  );
 }

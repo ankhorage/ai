@@ -3,7 +3,6 @@ import { createInterface, type Interface } from 'node:readline/promises';
 
 import { inspectProjectAsync } from '@ankhorage/project-detector/node';
 
-import type { AiConfig, AgentId, WorkflowId } from '../../types/ai.js';
 import { detectAgentAsync } from '../../features/agents/adapters/detectAgentAsync.js';
 import { agentCatalog } from '../../features/agents/domain/agentCatalog.js';
 import { readConfigAsync } from '../../features/config/adapters/readConfigAsync.js';
@@ -11,6 +10,7 @@ import { writeConfigAsync } from '../../features/config/adapters/writeConfigAsyn
 import { applyManagedArtifactsAsync } from '../../features/setup/application/applyManagedArtifactsAsync.js';
 import { inspectManagedArtifactsAsync } from '../../features/setup/application/inspectManagedArtifactsAsync.js';
 import { buildManagedArtifacts } from '../../features/setup/domain/buildManagedArtifacts.js';
+import type { AgentId, AiConfig, WorkflowId } from '../../types/ai.js';
 
 interface SetupSelection {
   readonly agents: readonly AgentId[];
@@ -18,16 +18,21 @@ interface SetupSelection {
 }
 
 /*** Inspect project evidence and guide an approval-gated AI setup. */
-export async function init(root: string, argv: readonly string[], output: (text: string) => void): Promise<number> {
+export async function init(
+  root: string,
+  argv: readonly string[],
+  output: (text: string) => void,
+): Promise<number> {
   const existing = await readConfigAsync(root);
   if (existing !== null) throw new Error('AI is already initialized. Run ankh ai sync instead.');
   const dryRun = argv.includes('--dry-run');
   const yes = argv.includes('--yes');
   const available = await Promise.all(agentCatalog.map((agent) => detectAgentAsync(agent.id)));
   const known = available.filter((agent) => agent.installed).map((agent) => agent.id);
-  const ui = process.stdin.isTTY && !yes && !dryRun
-    ? createInterface({ input: process.stdin, output: process.stdout })
-    : null;
+  const ui =
+    process.stdin.isTTY && !yes && !dryRun
+      ? createInterface({ input: process.stdin, output: process.stdout })
+      : null;
   try {
     output('Ankhorage AI Setup\n');
     output('Detected installed agents: ' + (known.join(', ') || 'none') + '\n');
@@ -41,15 +46,25 @@ export async function init(root: string, argv: readonly string[], output: (text:
     if (changes.some((change) => change.action === 'conflict')) {
       throw new Error('Existing custom files conflict; nothing was written.');
     }
-    if (dryRun) { output('Dry run: no files written.\n'); return 0; }
-    const approved = yes || await confirmSetupAsync(ui);
-    if (!approved) { output('Setup cancelled. Use --yes for non-interactive setup.\n'); return 0; }
+    if (dryRun) {
+      output('Dry run: no files written.\n');
+      return 0;
+    }
+    const approved = yes || (await confirmSetupAsync(ui));
+    if (!approved) {
+      output('Setup cancelled. Use --yes for non-interactive setup.\n');
+      return 0;
+    }
     await applyManagedArtifactsAsync(root, artifacts, false);
     await writeConfigAsync(root, config);
     output('AI setup applied. Run ankh ai doctor and ankh ai cheatsheet.\n');
-    output('Canonical AGENTS.md and shared repository skills remain owned by @ankhorage/devtools.\n');
+    output(
+      'Canonical AGENTS.md and shared repository skills remain owned by @ankhorage/devtools.\n',
+    );
     if (config.workflow === 'bmad') {
-      output('BMAD selected. Install upstream BMAD explicitly via ankh ai bmad install --approve.\n');
+      output(
+        'BMAD selected. Install upstream BMAD explicitly via ankh ai bmad install --approve.\n',
+      );
     }
     return 0;
   } finally {
@@ -58,18 +73,30 @@ export async function init(root: string, argv: readonly string[], output: (text:
 }
 
 /*** Capture agent and methodology choices in interactive or noninteractive mode. */
-async function selectSetupAsync(argv: readonly string[], known: readonly AgentId[], ui: Interface | null): Promise<SetupSelection> {
+async function selectSetupAsync(
+  argv: readonly string[],
+  known: readonly AgentId[],
+  ui: Interface | null,
+): Promise<SetupSelection> {
   const agentFlag = readOption(argv, '--agents');
   const workflowFlag = readOption(argv, '--workflow') ?? 'standard';
   if (workflowFlag !== 'standard' && workflowFlag !== 'bmad') throw new Error('Invalid workflow.');
   const defaults = agentFlag === null ? [...known] : parseAgents(agentFlag);
-  const agents = ui === null ? defaults : parseAgents(
-    (await ui.question('Agents (comma-separated, default ' + defaults.join(',') + '): ')).trim() || defaults.join(','),
-  );
-  if (agents.length === 0) throw new Error('Choose at least one agent using --agents codex,claude-code.');
-  const rawWorkflow = ui === null
-    ? workflowFlag
-    : (await ui.question('Methodology [standard/bmad] (' + workflowFlag + '): ')).trim() || workflowFlag;
+  const agents =
+    ui === null
+      ? defaults
+      : parseAgents(
+          (
+            await ui.question('Agents (comma-separated, default ' + defaults.join(',') + '): ')
+          ).trim() || defaults.join(','),
+        );
+  if (agents.length === 0)
+    throw new Error('Choose at least one agent using --agents codex,claude-code.');
+  const rawWorkflow =
+    ui === null
+      ? workflowFlag
+      : (await ui.question('Methodology [standard/bmad] (' + workflowFlag + '): ')).trim() ||
+        workflowFlag;
   if (rawWorkflow !== 'standard' && rawWorkflow !== 'bmad') throw new Error('Invalid workflow.');
   return { agents, workflow: rawWorkflow };
 }
@@ -77,7 +104,8 @@ async function selectSetupAsync(argv: readonly string[], known: readonly AgentId
 /*** Inspect actual project metadata without executing untrusted project scripts. */
 async function buildSetupConfigAsync(root: string, selection: SetupSelection): Promise<AiConfig> {
   const detection = await inspectProjectAsync(root);
-  if (!detection.complete) throw new Error('Project inspection incomplete; refusing to persist incomplete metadata.');
+  if (!detection.complete)
+    throw new Error('Project inspection incomplete; refusing to persist incomplete metadata.');
   const [defaultAgent] = selection.agents;
   if (defaultAgent === undefined) throw new Error('An AI agent is required.');
   return {

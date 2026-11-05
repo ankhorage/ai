@@ -7,11 +7,17 @@ import { readPlanAsync } from '../adapters/readPlanAsync.js';
 import { writeArtifactAsync } from '../adapters/writeArtifactAsync.js';
 
 /*** Execute only an explicitly approved plan on an isolated feature branch. */
-export async function executePlanAsync(root: string, config: AiConfig, id: string, approved: boolean): Promise<AiRun> {
+export async function executePlanAsync(
+  root: string,
+  config: AiConfig,
+  id: string,
+  approved: boolean,
+): Promise<AiRun> {
   if (!approved) throw new Error('Explicit --approve is required for execution.');
   await ensureWorkBranchAsync(root);
   const plan = await readPlanAsync(root, id);
-  if (plan.status === 'executed') throw new Error('Plan is already executed; create a new plan for more changes.');
+  if (plan.status === 'executed')
+    throw new Error('Plan is already executed; create a new plan for more changes.');
   const prompt = [
     'Execute the following approved implementation plan. Respect AGENTS.md and all applicable .agents/skills.',
     'Keep changes scoped to the goal and provide exact validation evidence. Do not commit, push or open PRs.',
@@ -31,6 +37,7 @@ export async function executePlanAsync(root: string, config: AiConfig, id: strin
     exitCode: result.exitCode,
   };
   await writeArtifactAsync(root, 'runs/' + run.id + '.json', run);
-  if (result.exitCode === 0) await writeArtifactAsync(root, 'plans/' + id + '.json', { ...plan, status: 'executed' });
+  if (result.exitCode === 0)
+    await writeArtifactAsync(root, 'plans/' + id + '.json', { ...plan, status: 'executed' });
   return run;
 }

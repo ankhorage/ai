@@ -1,33 +1,50 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import type { AiConfig, AiRun } from '../../types/ai.js';
 import { ensureWorkBranchAsync } from '../../features/workflows/adapters/ensureWorkBranchAsync.js';
 import { runProcessAsync } from '../../features/workflows/adapters/runProcessAsync.js';
+import type { AiConfig, AiRun } from '../../types/ai.js';
 
 /*** Validate repository quality gates and optionally open an issue-linked PR. */
-export async function ship(root: string, config: AiConfig, argv: readonly string[], output: (text: string) => void): Promise<number> {
+export async function ship(
+  root: string,
+  config: AiConfig,
+  argv: readonly string[],
+  output: (text: string) => void,
+): Promise<number> {
   await ensureWorkBranchAsync(root);
   if (config.security.requireReview) await ensureReviewAsync(root, output);
   const checks = await validateQualityAsync(root, output);
   if (!argv.includes('--approve')) {
-    output('Validation passed. Use --approve --title "feat(scope): ..." --issue <number> to create a PR.\n');
+    output(
+      'Validation passed. Use --approve --title "feat(scope): ..." --issue <number> to create a PR.\n',
+    );
     return 0;
   }
   const title = valueOf(argv, '--title');
   const issue = valueOf(argv, '--issue');
-  if (!title || !/^(feat|fix|docs|refactor|perf|test|build|ci|chore)(\([a-z0-9-]+\))?!?: .+/.test(title)) {
+  if (
+    !title ||
+    !/^(feat|fix|docs|refactor|perf|test|build|ci|chore)(\([a-z0-9-]+\))?!?: .+/.test(title)
+  ) {
     throw new Error('A conventional --title is required.');
   }
-  if (!issue || !/^\d+$/.test(issue)) throw new Error('A numeric --issue is required for linked delivery.');
+  if (!issue || !/^\d+$/.test(issue))
+    throw new Error('A numeric --issue is required for linked delivery.');
   const gitStatus = await runProcessAsync('git', ['status', '--porcelain'], root);
   if (gitStatus.exitCode !== 0 || gitStatus.output.trim()) {
     throw new Error('Worktree must be clean and committed before PR creation.');
   }
-  const body = '## Summary\n\nDelivered through Ankhorage AI workflow.\n\n## Validation\n\n' +
+  const body =
+    '## Summary\n\nDelivered through Ankhorage AI workflow.\n\n## Validation\n\n' +
     checks.map((check) => '- [x] `bun run ' + check + '`').join('\n') +
-    '\n\n## Review\n\n- AI review artifact inspected; findings require human disposition.\n\nCloses #' + issue;
-  const result = await runProcessAsync('gh', ['pr', 'create', '--title', title, '--body', body, '--assignee', 'artiphishle'], root);
+    '\n\n## Review\n\n- AI review artifact inspected; findings require human disposition.\n\nCloses #' +
+    issue;
+  const result = await runProcessAsync(
+    'gh',
+    ['pr', 'create', '--title', title, '--body', body, '--assignee', 'artiphishle'],
+    root,
+  );
   output(result.output + '\n');
   return result.exitCode;
 }
@@ -44,12 +61,17 @@ async function ensureReviewAsync(root: string, output: (text: string) => void): 
 }
 
 /*** Run required repository scripts without dynamic script execution from arguments. */
-async function validateQualityAsync(root: string, output: (text: string) => void): Promise<readonly string[]> {
+async function validateQualityAsync(
+  root: string,
+  output: (text: string) => void,
+): Promise<readonly string[]> {
   const metadata: unknown = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
-  if (!record(metadata) || !record(metadata.scripts)) throw new Error('Missing package.json scripts.');
+  if (!record(metadata) || !record(metadata.scripts))
+    throw new Error('Missing package.json scripts.');
   const checks = ['build', 'check-types', 'lint', 'knip:check', 'test', 'format:check'];
   for (const name of checks) {
-    if (!Object.hasOwn(metadata.scripts, name)) throw new Error('Required validation script is missing: ' + name);
+    if (!Object.hasOwn(metadata.scripts, name))
+      throw new Error('Required validation script is missing: ' + name);
     output('Running bun run ' + name + '\n');
     const result = await runProcessAsync('bun', ['run', name], root);
     if (result.exitCode !== 0) throw new Error('Validation failed: ' + name + '\n' + result.output);

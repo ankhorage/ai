@@ -1,12 +1,15 @@
 import { randomUUID } from 'node:crypto';
 
-import type { AiConfig, AiRun } from '../../types/ai.js';
 import { invokeAgentAsync } from '../../features/workflows/adapters/invokeAgentAsync.js';
 import { writeArtifactAsync } from '../../features/workflows/adapters/writeArtifactAsync.js';
+import type { AiConfig, AiRun } from '../../types/ai.js';
 
 /*** Ask the configured agent for a read-only multi-perspective design discussion. */
 export async function discuss(root: string, config: AiConfig, goal: string): Promise<AiRun> {
-  if (config.workflow === 'bmad') throw new Error('Native BMAD party mode must run through a verified installed upstream BMAD workflow; this adapter cannot claim BMAD execution.');
+  if (config.workflow === 'bmad')
+    throw new Error(
+      'Native BMAD party mode must run through a verified installed upstream BMAD workflow; this adapter cannot claim BMAD execution.',
+    );
   if (!goal.trim()) throw new Error('Topic required: ankh ai discuss "..."');
   const prompt = [
     'Discuss the topic from architect, implementer, QA and security perspectives. Do not modify files.',

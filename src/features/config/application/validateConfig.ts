@@ -1,4 +1,4 @@
-import type { AiConfig, AiProjectMetadata, AgentId } from '../../../types/ai.js';
+import type { AgentId, AiConfig, AiProjectMetadata } from '../../../types/ai.js';
 import { agentCatalog } from '../../agents/domain/agentCatalog.js';
 
 /*** Validate untrusted project configuration at the application boundary. */
@@ -56,8 +56,12 @@ function validateAgents(input: unknown): AgentId[] {
 
 /*** Security policy always keeps explicit consent and protected main. */
 function validateSecurity(input: unknown): AiConfig['security'] {
-  if (!record(input) || input.requireExecutionApproval !== true || input.protectMain !== true ||
-    typeof input.requireReview !== 'boolean') {
+  if (
+    !record(input) ||
+    input.requireExecutionApproval !== true ||
+    input.protectMain !== true ||
+    typeof input.requireReview !== 'boolean'
+  ) {
     throw new Error('Unsafe security settings: approvals and main protection are mandatory.');
   }
   return {

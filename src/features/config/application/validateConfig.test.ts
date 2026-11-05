@@ -4,7 +4,12 @@ import { validateConfig } from './validateConfig.js';
 
 const base = {
   schemaVersion: 1,
-  project: { name: 'demo', architecture: 'hexagonal', languages: ['typescript'], packageManagers: ['bun'] },
+  project: {
+    name: 'demo',
+    architecture: 'hexagonal',
+    languages: ['typescript'],
+    packageManagers: ['bun'],
+  },
   agents: ['codex', 'claude-code'],
   defaultAgent: 'codex',
   workflow: 'standard',
@@ -18,7 +23,9 @@ test('accepts complete project config', () => {
 });
 
 test('rejects disabled approvals and unknown agents', () => {
-  expect(() => validateConfig({ ...base, security: { ...base.security, requireExecutionApproval: false } })).toThrow();
+  expect(() =>
+    validateConfig({ ...base, security: { ...base.security, requireExecutionApproval: false } }),
+  ).toThrow();
   expect(() => validateConfig({ ...base, agents: ['codex', 'impostor'] })).toThrow();
   expect(() => validateConfig({ ...base, agents: ['codex', 'codex'] })).toThrow();
 });

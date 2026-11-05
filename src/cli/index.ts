@@ -1,12 +1,26 @@
-import metadata from '../../package.json' with { type: 'json' };
-
 import type { AnkhRuntimeCommandProvider } from '@ankhorage/ankh';
 
+import metadata from '../../package.json' with { type: 'json' };
 import { runCliAsync } from './runCliAsync.js';
 
 const names = [
-  'init', 'sync', 'rollback', 'status', 'doctor', 'cheatsheet', 'agents',
-  'skills', 'mcp', 'plugins', 'hooks', 'plan', 'execute', 'review', 'fix', 'ship', 'discuss',
+  'init',
+  'sync',
+  'rollback',
+  'status',
+  'doctor',
+  'cheatsheet',
+  'agents',
+  'skills',
+  'mcp',
+  'plugins',
+  'hooks',
+  'plan',
+  'execute',
+  'review',
+  'fix',
+  'ship',
+  'discuss',
 ] as const;
 
 const provider = {
@@ -21,11 +35,17 @@ const provider = {
     label: 'AI ' + name,
     description: 'Ankhorage AI ' + name,
   })),
-  commands: names.map((name) => ({ path: [name], capability: `ai.${name}` as const, summary: 'Ankhorage AI ' + name })),
+  commands: names.map((name) => ({
+    path: [name],
+    capability: `ai.${name}` as const,
+    summary: 'Ankhorage AI ' + name,
+  })),
   handlers: names.map((name) => ({
     path: [name],
-    handler: async (request: { argv: readonly string[]; context: { cwd: string; writeStdout(text: string): void; writeStderr(text: string): void } }) =>
-      ({ exitCode: await runCliAsync([name, ...request.argv], request.context) }),
+    handler: async (request: {
+      argv: readonly string[];
+      context: { cwd: string; writeStdout(text: string): void; writeStderr(text: string): void };
+    }) => ({ exitCode: await runCliAsync([name, ...request.argv], request.context) }),
   })),
 } satisfies AnkhRuntimeCommandProvider;
 

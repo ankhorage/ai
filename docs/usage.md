@@ -11,5 +11,4 @@
 
 Phased delivery deliberately separates agent setup from agent execution and shipping. Any integration that cannot be verified is reported as unavailable.
 
-
 Detailed user-facing commands are documented in the source package and `ankh ai cheatsheet`.

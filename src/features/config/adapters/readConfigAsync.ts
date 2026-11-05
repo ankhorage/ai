@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
+
 import { parse } from 'yaml';
 
 import type { AiConfig } from '../../../types/ai.js';

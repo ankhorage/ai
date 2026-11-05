@@ -9,14 +9,25 @@ import { ship } from './ship.js';
 
 /*** Dispatch persistent AI workflows with explicit approval enforcement. */
 export async function workflow(
-  root: string, command: WorkflowCommand, args: readonly string[], output: (text: string) => void,
+  root: string,
+  command: WorkflowCommand,
+  args: readonly string[],
+  output: (text: string) => void,
 ): Promise<number> {
   const config = await readConfigAsync(root);
   if (config === null) throw new Error('Run ankh ai init first.');
   if (command === 'ship') return await ship(root, config, args, output);
   if (command === 'plan') {
     const plan = await createPlanAsync(root, config, args.join(' '));
-    output('Plan ' + plan.id + '\n' + plan.instructions + '\nRun ankh ai execute ' + plan.id + ' --approve to implement.\n');
+    output(
+      'Plan ' +
+        plan.id +
+        '\n' +
+        plan.instructions +
+        '\nRun ankh ai execute ' +
+        plan.id +
+        ' --approve to implement.\n',
+    );
     return 0;
   }
   if (command === 'execute') {

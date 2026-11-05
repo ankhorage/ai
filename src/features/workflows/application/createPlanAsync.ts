@@ -5,7 +5,11 @@ import { invokeAgentAsync } from '../adapters/invokeAgentAsync.js';
 import { writeArtifactAsync } from '../adapters/writeArtifactAsync.js';
 
 /*** Generate a persistent plan from an actual read-only AI CLI invocation. */
-export async function createPlanAsync(root: string, config: AiConfig, goal: string): Promise<AiPlan> {
+export async function createPlanAsync(
+  root: string,
+  config: AiConfig,
+  goal: string,
+): Promise<AiPlan> {
   if (!goal.trim()) throw new Error('A goal is required: ankh ai plan "..."');
   const prompt = [
     'You are planning a code change, not implementing it. Do not modify files.',
@@ -14,7 +18,8 @@ export async function createPlanAsync(root: string, config: AiConfig, goal: stri
     'Goal: ' + goal,
   ].join('\n\n');
   const result = await invokeAgentAsync(root, config.defaultAgent, prompt, false);
-  if (result.exitCode !== 0 || !result.output.trim()) throw new Error('Agent planning failed:\n' + result.output);
+  if (result.exitCode !== 0 || !result.output.trim())
+    throw new Error('Agent planning failed:\n' + result.output);
   const plan: AiPlan = {
     schemaVersion: 1,
     kind: 'ankh-ai-plan',

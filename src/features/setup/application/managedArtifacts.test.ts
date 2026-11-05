@@ -1,7 +1,8 @@
-import { expect, test } from 'bun:test';
-import { mkdtemp, readFile, rm, writeFile, symlink, mkdir } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+
+import { expect, test } from 'bun:test';
 
 import type { AiConfig } from '../../../types/ai.js';
 import { buildManagedArtifacts } from '../domain/buildManagedArtifacts.js';
@@ -11,7 +12,12 @@ import { rollbackManagedArtifactsAsync } from './rollbackManagedArtifactsAsync.j
 
 const config: AiConfig = {
   schemaVersion: 1,
-  project: { name: 'demo', architecture: 'hexagonal', languages: ['typescript'], packageManagers: ['bun'] },
+  project: {
+    name: 'demo',
+    architecture: 'hexagonal',
+    languages: ['typescript'],
+    packageManagers: ['bun'],
+  },
   agents: ['codex'],
   defaultAgent: 'codex',
   workflow: 'standard',
@@ -23,14 +29,34 @@ test('setup is idempotent and refuses unmanaged user edits', async () => {
   try {
     const artifacts = buildManagedArtifacts(config);
     expect(artifacts.length).toBe(7);
-    expect((await applyManagedArtifactsAsync(root, artifacts, true)).every((change) => change.action === 'create')).toBe(true);
-    expect((await applyManagedArtifactsAsync(root, artifacts, false)).every((change) => change.action === 'create')).toBe(true);
-    expect((await inspectManagedArtifactsAsync(root, artifacts)).every((change) => change.action === 'unchanged')).toBe(true);
+    expect(
+      (await applyManagedArtifactsAsync(root, artifacts, true)).every(
+        (change) => change.action === 'create',
+      ),
+    ).toBe(true);
+    expect(
+      (await applyManagedArtifactsAsync(root, artifacts, false)).every(
+        (change) => change.action === 'create',
+      ),
+    ).toBe(true);
+    expect(
+      (await inspectManagedArtifactsAsync(root, artifacts)).every(
+        (change) => change.action === 'unchanged',
+      ),
+    ).toBe(true);
     const first = artifacts.at(1);
     if (first === undefined) throw new Error('Missing test artifact.');
     await writeFile(join(root, first.path), 'custom user instructions');
-    expect((await inspectManagedArtifactsAsync(root, artifacts)).some((change) => change.action === 'conflict')).toBe(true);
-    expect((await applyManagedArtifactsAsync(root, artifacts, false)).some((change) => change.action === 'conflict')).toBe(true);
+    expect(
+      (await inspectManagedArtifactsAsync(root, artifacts)).some(
+        (change) => change.action === 'conflict',
+      ),
+    ).toBe(true);
+    expect(
+      (await applyManagedArtifactsAsync(root, artifacts, false)).some(
+        (change) => change.action === 'conflict',
+      ),
+    ).toBe(true);
     expect(await readFile(join(root, first.path), 'utf8')).toBe('custom user instructions');
   } finally {
     await rm(root, { recursive: true, force: true });
@@ -44,8 +70,11 @@ test('updates and rollback preserve previously managed content', async () => {
     await applyManagedArtifactsAsync(root, artifacts, false);
     const [original] = artifacts;
     if (original === undefined) throw new Error('Missing test artifact.');
-    const changed = artifacts.map((artifact) => artifact.path === original.path ?
-      { ...artifact, content: 'new generated commands\n' } : artifact);
+    const changed = artifacts.map((artifact) =>
+      artifact.path === original.path
+        ? { ...artifact, content: 'new generated commands\n' }
+        : artifact,
+    );
     const update = await applyManagedArtifactsAsync(root, changed, false);
     expect(update.filter((change) => change.action === 'update').length).toBe(1);
     await rollbackManagedArtifactsAsync(root);
