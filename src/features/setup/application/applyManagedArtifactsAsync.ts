@@ -71,6 +71,6 @@ async function backupPreviousFilesAsync(
       },
       null,
       2,
-    ) + '\\n',
+    ) + '\n',
   );
 }

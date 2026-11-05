@@ -15,6 +15,7 @@ const names = [
   'mcp',
   'plugins',
   'hooks',
+  'bmad',
   'plan',
   'execute',
   'review',

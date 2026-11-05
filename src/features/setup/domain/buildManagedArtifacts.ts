@@ -14,9 +14,9 @@ export function buildManagedArtifacts(config: AiConfig): readonly ManagedArtifac
     {
       path: '.ankh/ai/COMMANDS.md',
       content:
-        '# Ankhorage AI commands\\n\\n' +
-        commands.map((command) => '- `ankh ai ' + command + '`').join('\\n') +
-        '\\n\\nUse `ankh ai cheatsheet` for the live inventory.\\n',
+        '# Ankhorage AI commands\n\n' +
+        commands.map((command) => '- `ankh ai ' + command + '`').join('\n') +
+        '\n\nUse `ankh ai cheatsheet` for the live inventory.\n',
     },
     ...config.agents.flatMap((agent) =>
       commands.map((command) => buildCommandArtifact(agent, command)),
@@ -35,17 +35,17 @@ function buildCommandArtifact(agent: AgentId, command: WorkflowCommand): Managed
   ].join(' ');
   const label = 'ankh-' + command;
   const markdown =
-    '---\\nname: ' +
+    '---\nname: ' +
     label +
-    '\\ndescription: Run Ankhorage ' +
+    '\ndescription: Run Ankhorage ' +
     command +
-    ' workflow using the canonical CLI.\\n---\\n\\n# ' +
+    ' workflow using the canonical CLI.\n---\n\n# ' +
     label +
-    '\\n\\n' +
+    '\n\n' +
     descriptor +
-    '\\n\\nInvoke: `ankh ai ' +
+    '\n\nInvoke: `ankh ai ' +
     command +
-    '` (with task arguments as appropriate).\\n';
+    '` (with task arguments as appropriate).\n';
   switch (agent) {
     case 'codex':
       return { path: '.agents/skills/' + label + '/SKILL.md', content: markdown };
@@ -54,7 +54,7 @@ function buildCommandArtifact(agent: AgentId, command: WorkflowCommand): Managed
     case 'cursor':
       return {
         path: '.cursor/commands/' + label + '.md',
-        content: '# ' + label + '\\n\\n' + descriptor + '\\n',
+        content: '# ' + label + '\n\n' + descriptor + '\n',
       };
     case 'gemini':
       return {
@@ -62,9 +62,9 @@ function buildCommandArtifact(agent: AgentId, command: WorkflowCommand): Managed
         content:
           'description = "Ankhorage ' +
           command +
-          ' workflow"\\nprompt = "' +
+          ' workflow"\nprompt = "' +
           descriptor.replaceAll('"', '\\\\"') +
-          '"\\n',
+          '"\n',
       };
   }
 }
