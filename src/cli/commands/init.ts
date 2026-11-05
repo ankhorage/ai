@@ -40,9 +40,7 @@ export async function init(
     const config = await buildSetupConfigAsync(root, selection);
     const artifacts = buildManagedArtifacts(config);
     const changes = await inspectManagedArtifactsAsync(root, artifacts);
-    output('Project: ' + config.project.name + ' [' + config.project.languages.join(', ') + ']\n');
-    output('Agents: ' + selection.agents.join(', ') + ' | Workflow: ' + config.workflow + '\n');
-    changes.forEach((change) => output('  ' + change.action + ' ' + change.path + '\n'));
+    showSetupPreview(output, config, changes);
     if (changes.some((change) => change.action === 'conflict')) {
       throw new Error('Existing custom files conflict; nothing was written.');
     }
@@ -150,7 +148,11 @@ function parseAgents(value: string): AgentId[] {
 }
 
 /*** Show project evidence and proposed file writes before requesting consent. */
-function showSetupPreview(output: (text: string) => void, config: AiConfig, changes: readonly SetupChange[]): void {
+function showSetupPreview(
+  output: (text: string) => void,
+  config: AiConfig,
+  changes: readonly SetupChange[],
+): void {
   output('Project: ' + config.project.name + ' [' + config.project.languages.join(', ') + ']\\n');
   output('Agents: ' + config.agents.join(', ') + ' | Workflow: ' + config.workflow + '\\n');
   changes.forEach((change) => output('  ' + change.action + ' ' + change.path + '\\n'));

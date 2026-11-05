@@ -53,15 +53,24 @@ async function backupPreviousFilesAsync(
   const backupRoot = join(root, '.ankh/ai/backups', backupId);
   await mkdir(backupRoot, { recursive: true });
   const previous = changes.filter((change) => change.action === 'update');
-  await Promise.all(previous.map(async (change) => {
-    const source = await assertSafePathAsync(root, change.path);
-    const target = join(backupRoot, change.path);
-    await mkdir(dirname(target), { recursive: true });
-    await writeFile(target, await readFile(source));
-  }));
-  await writeFile(join(backupRoot, 'previous.json'), JSON.stringify({
-    schemaVersion: 1,
-    files: hashes,
-    changes,
-  }, null, 2) + '\\n');
+  await Promise.all(
+    previous.map(async (change) => {
+      const source = await assertSafePathAsync(root, change.path);
+      const target = join(backupRoot, change.path);
+      await mkdir(dirname(target), { recursive: true });
+      await writeFile(target, await readFile(source));
+    }),
+  );
+  await writeFile(
+    join(backupRoot, 'previous.json'),
+    JSON.stringify(
+      {
+        schemaVersion: 1,
+        files: hashes,
+        changes,
+      },
+      null,
+      2,
+    ) + '\\n',
+  );
 }
