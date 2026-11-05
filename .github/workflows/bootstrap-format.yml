@@ -1,17 +1,11 @@
-name: Bootstrap canonical formatting
-
+name: Capture canonical formatting
 on:
   push:
     branches: [main]
-    paths:
-      - .github/workflows/bootstrap-format.yml
-
 permissions:
   contents: read
-
 jobs:
-  format:
-    if: github.event.head_commit.message == 'chore(ai): capture canonical formatting for bootstrap'
+  capture:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,22 +13,14 @@ jobs:
         with:
           bun-version: 1.4.2
       - run: bun install
-      - name: Apply canonical format and autofix in runner
-        shell: bash
+      - run: bun run format
+      - run: bunx ankhorage-eslint . --fix --max-warnings=0 || true
+      - run: bun run format
+      - name: Export formatted changed files
         run: |
-          bun run format
-          bunx ankhorage-eslint . --fix --max-warnings=0 || true
-          bun run format
-      - name: Emit changed content for the reviewed commit
-        shell: bash
-        run: |
-          node <<'NODE'
-          const fs = require('node:fs');
-          const cp = require('node:child_process');
-          const paths = cp.execFileSync('git', ['diff', '--name-only'], {encoding:'utf8'}).split('\n').filter(Boolean);
-          for (const path of paths) {
-            const content = fs.readFileSync(path, 'utf8');
-            console.log('ANKH_FORMATTED ' + JSON.stringify({path,content}));
-          }
-          console.log('ANKH_FORMATTED_COUNT ' + paths.length);
-          NODE
+          node -e '
+          const fs=require("node:fs"),cp=require("node:child_process");
+          const files=cp.execFileSync("git",["diff","--name-only"],{encoding:"utf8"}).split("\\n").filter(Boolean);
+          for(const path of files){console.log("ANKH_FORMATTED "+JSON.stringify({path,content:fs.readFileSync(path,"utf8")}));}
+          console.log("ANKH_FORMATTED_COUNT "+files.length);
+          '
