@@ -11,7 +11,6 @@ import { rollback } from './commands/rollback.js';
 import { status } from './commands/status.js';
 import { sync } from './commands/sync.js';
 import { workflow } from './commands/workflow.js';
-import type { WorkflowCommand } from '../types/ai.js';
 
 export interface AiCliContext {
   readonly cwd: string;
@@ -43,7 +42,7 @@ export async function runCliAsync(argv: readonly string[], context: AiCliContext
       case 'review':
       case 'fix':
       case 'ship':
-      case 'discuss': return await workflow(root, command as WorkflowCommand, rest, output);
+      case 'discuss': return await workflow(root, command, rest, output);
       default:
         output('Ankhorage AI\n\nUsage: ankh ai <command> [arguments]\nCommands: init, sync, rollback, status, doctor, cheatsheet, agents, skills, mcp, plugins, hooks, bmad, plan, execute, review, fix, ship, discuss\n');
         return command === undefined || command === '--help' || command === 'help' ? 0 : 1;

@@ -11,7 +11,7 @@ export async function readManagedRecordAsync(root: string): Promise<ManagedRecor
         !('files' in value) || typeof value.files !== 'object' || value.files === null || Array.isArray(value.files)) {
       throw new Error('Invalid managed.json: refusing to overwrite unknown state.');
     }
-    const files = value.files;
+    const { files } = value;
     if (Object.values(files).some((hash) => typeof hash !== 'string' || !/^[a-f0-9]{64}$/.test(hash))) throw new Error('Invalid managed fingerprints.');
     return { schemaVersion: 1, files: files as Record<string, string> };
   } catch (error: unknown) {

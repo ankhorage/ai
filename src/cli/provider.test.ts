@@ -8,7 +8,7 @@ test('provider commands and declared metadata are aligned', () => {
   const expected = new Set(provider.commands.map((command) => command.capability));
   const actual = new Set(metadata.ankh.capabilities.map((capability) => capability.id));
   expect(actual).toEqual(expected);
-  expect(provider.handlers?.length).toBe(provider.commands.length);
+  expect(provider.handlers.length).toBe(provider.commands.length);
 });
 
 test('standalone help and cheatsheet work without installed agents', async () => {

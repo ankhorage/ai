@@ -6,33 +6,24 @@ import { ensureWorkBranchAsync } from '../../features/workflows/adapters/ensureW
 import { runProcessAsync } from '../../features/workflows/adapters/runProcessAsync.js';
 
 /*** Validate repository quality gates and optionally open an issue-linked PR. */
-export async function ship(
-  root: string, config: AiConfig, argv: readonly string[], output: (text: string) => void,
-): Promise<number> {
+export async function ship(root: string, config: AiConfig, argv: readonly string[], output: (text: string) => void): Promise<number> {
   await ensureWorkBranchAsync(root);
-  if (config.security.requireReview) {
-    const review = await readFile(join(root, '.ankh/ai/reviews/latest.json'), 'utf8').then((text) => JSON.parse(text) as AiRun, () => null);
-    if (review?.command !== 'review' || review.exitCode !== 0) throw new Error('A successful ankh ai review is required before ship.');
-    output('AI review evidence found. Human review of findings remains required.\n');
-  }
-  const scripts = JSON.parse(await readFile(join(root, 'package.json'), 'utf8')) as { scripts?: Record<string, string> };
-  const checks = ['build', 'check-types', 'lint', 'knip:check', 'test', 'format:check'];
-  for (const name of checks) {
-    if (scripts.scripts?.[name] === undefined) throw new Error('Required validation script is missing: ' + name);
-    output('Running bun run ' + name + '\n');
-    const result = await runProcessAsync('bun', ['run', name], root);
-    if (result.exitCode !== 0) { output(result.output + '\n'); throw new Error('Validation failed: ' + name); }
-  }
+  if (config.security.requireReview) await ensureReviewAsync(root, output);
+  const checks = await validateQualityAsync(root, output);
   if (!argv.includes('--approve')) {
     output('Validation passed. Use --approve --title "feat(scope): ..." --issue <number> to create a PR.\n');
     return 0;
   }
   const title = valueOf(argv, '--title');
   const issue = valueOf(argv, '--issue');
-  if (!title || !/^(feat|fix|docs|refactor|perf|test|build|ci|chore)(\([a-z0-9-]+\))?!?: .+/.test(title)) throw new Error('A conventional --title is required.');
+  if (!title || !/^(feat|fix|docs|refactor|perf|test|build|ci|chore)(\([a-z0-9-]+\))?!?: .+/.test(title)) {
+    throw new Error('A conventional --title is required.');
+  }
   if (!issue || !/^\d+$/.test(issue)) throw new Error('A numeric --issue is required for linked delivery.');
-  const status = await runProcessAsync('git', ['status', '--porcelain'], root);
-  if (status.exitCode !== 0 || status.output.trim()) throw new Error('Worktree must be clean and committed before PR creation.');
+  const gitStatus = await runProcessAsync('git', ['status', '--porcelain'], root);
+  if (gitStatus.exitCode !== 0 || gitStatus.output.trim()) {
+    throw new Error('Worktree must be clean and committed before PR creation.');
+  }
   const body = '## Summary\n\nDelivered through Ankhorage AI workflow.\n\n## Validation\n\n' +
     checks.map((check) => '- [x] `bun run ' + check + '`').join('\n') +
     '\n\n## Review\n\n- AI review artifact inspected; findings require human disposition.\n\nCloses #' + issue;
@@ -41,8 +32,38 @@ export async function ship(
   return result.exitCode;
 }
 
-/*** Read a single CLI option value without shell interpretation. */
+/*** Check that a successful read-only review artifact exists. */
+async function ensureReviewAsync(root: string, output: (text: string) => void): Promise<void> {
+  const text = await readFile(join(root, '.ankh/ai/reviews/latest.json'), 'utf8').catch(() => null);
+  if (text === null) throw new Error('Run ankh ai review before shipping.');
+  const review: AiRun = JSON.parse(text) as AiRun;
+  if (review.command !== 'review' || review.exitCode !== 0) {
+    throw new Error('A successful ankh ai review is required before ship.');
+  }
+  output('AI review evidence found. Human review of findings remains required.\n');
+}
+
+/*** Run required repository scripts without dynamic script execution from arguments. */
+async function validateQualityAsync(root: string, output: (text: string) => void): Promise<readonly string[]> {
+  const metadata: unknown = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
+  if (!record(metadata) || !record(metadata.scripts)) throw new Error('Missing package.json scripts.');
+  const checks = ['build', 'check-types', 'lint', 'knip:check', 'test', 'format:check'];
+  for (const name of checks) {
+    if (!Object.hasOwn(metadata.scripts, name)) throw new Error('Required validation script is missing: ' + name);
+    output('Running bun run ' + name + '\n');
+    const result = await runProcessAsync('bun', ['run', name], root);
+    if (result.exitCode !== 0) throw new Error('Validation failed: ' + name + '\n' + result.output);
+  }
+  return checks;
+}
+
+/*** Parse a single value without using user-controlled shell expressions. */
 function valueOf(argv: readonly string[], flag: string): string | null {
   const index = argv.indexOf(flag);
-  return index === -1 ? null : argv[index + 1] ?? null;
+  return index === -1 ? null : (argv[index + 1] ?? null);
+}
+
+/*** Recognize a plain object read from project metadata. */
+function record(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }

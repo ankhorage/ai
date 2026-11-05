@@ -20,19 +20,31 @@ test('MCP preview is non-destructive and approval writes native configs', async 
   try {
     const preview = await addMcpAsync(root, config, 'docs', 'https://example.com/mcp', false);
     expect(preview.length).toBe(4);
-    await expect(readFile(join(root, '.mcp.json'), 'utf8')).rejects.toThrow();
+    const missing = await readFile(join(root, '.mcp.json'), 'utf8').then(() => false, () => true);
+    expect(missing).toBe(true);
     const applied = await addMcpAsync(root, config, 'docs', 'https://example.com/mcp', true);
     expect(applied.length).toBe(4);
-    expect(JSON.parse(await readFile(join(root, '.mcp.json'), 'utf8')).mcpServers.docs.url).toBe('https://example.com/mcp');
+    expect(JSON.parse(await readFile(join(root, '.mcp.json'), 'utf8')) as unknown).toEqual({
+      mcpServers: { docs: { type: 'http', url: 'https://example.com/mcp' } },
+    });
     expect((await readFile(join(root, '.codex/config.toml'), 'utf8'))).toContain('[mcp_servers.docs]');
-    await expect(addMcpAsync(root, config, 'docs', 'https://example.com/mcp', true)).rejects.toThrow(/already exists/);
+    const duplicate = await addMcpAsync(root, config, 'docs', 'https://example.com/mcp', true).then(
+      () => null, (reason: unknown) => String(reason),
+    );
+    expect(duplicate).toContain('already exists');
   } finally { await rm(root, { recursive: true, force: true }); }
 });
 
 test('rejects URL credentials and insecure transports', async () => {
   const root = await mkdtemp(join(tmpdir(), 'ankh-ai-mcp-'));
   try {
-    await expect(addMcpAsync(root, config, 'docs', 'http://example.com', false)).rejects.toThrow(/HTTPS/);
-    await expect(addMcpAsync(root, config, 'docs', 'https://user:pass@example.com', false)).rejects.toThrow(/credentials/);
+    const insecure = await addMcpAsync(root, config, 'docs', 'http://example.com', false).then(
+      () => null, (reason: unknown) => String(reason),
+    );
+    expect(insecure).toContain('HTTPS');
+    const credentials = await addMcpAsync(root, config, 'docs', 'https://user:pass@example.com', false).then(
+      () => null, (reason: unknown) => String(reason),
+    );
+    expect(credentials).toContain('credentials');
   } finally { await rm(root, { recursive: true, force: true }); }
 });

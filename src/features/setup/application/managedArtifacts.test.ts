@@ -26,7 +26,8 @@ test('setup is idempotent and refuses unmanaged user edits', async () => {
     expect((await applyManagedArtifactsAsync(root, artifacts, true)).every((change) => change.action === 'create')).toBe(true);
     expect((await applyManagedArtifactsAsync(root, artifacts, false)).every((change) => change.action === 'create')).toBe(true);
     expect((await inspectManagedArtifactsAsync(root, artifacts)).every((change) => change.action === 'unchanged')).toBe(true);
-    const first = artifacts[1]!;
+    const first = artifacts.at(1);
+    if (first === undefined) throw new Error('Missing test artifact.');
     await writeFile(join(root, first.path), 'custom user instructions');
     expect((await inspectManagedArtifactsAsync(root, artifacts)).some((change) => change.action === 'conflict')).toBe(true);
     expect((await applyManagedArtifactsAsync(root, artifacts, false)).some((change) => change.action === 'conflict')).toBe(true);
@@ -41,12 +42,14 @@ test('updates and rollback preserve previously managed content', async () => {
   try {
     const artifacts = buildManagedArtifacts(config);
     await applyManagedArtifactsAsync(root, artifacts, false);
-    const changed = artifacts.map((artifact) => artifact.path === artifacts[0]!.path ?
+    const [original] = artifacts;
+    if (original === undefined) throw new Error('Missing test artifact.');
+    const changed = artifacts.map((artifact) => artifact.path === original.path ?
       { ...artifact, content: 'new generated commands\n' } : artifact);
     const update = await applyManagedArtifactsAsync(root, changed, false);
     expect(update.filter((change) => change.action === 'update').length).toBe(1);
     await rollbackManagedArtifactsAsync(root);
-    expect(await readFile(join(root, artifacts[0]!.path), 'utf8')).toBe(artifacts[0]!.content);
+    expect(await readFile(join(root, original.path), 'utf8')).toBe(original.content);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -58,7 +61,11 @@ test('refuses to manage symlinked parent directories', async () => {
   try {
     await mkdir(join(root, '.agents'), { recursive: true });
     await symlink(external, join(root, '.agents/skills'));
-    await expect(inspectManagedArtifactsAsync(root, buildManagedArtifacts(config))).rejects.toThrow(/symlink/i);
+    const error = await inspectManagedArtifactsAsync(root, buildManagedArtifacts(config)).then(
+      () => null,
+      (reason: unknown) => String(reason),
+    );
+    expect(error).toContain('symlink');
   } finally {
     await rm(root, { recursive: true, force: true });
     await rm(external, { recursive: true, force: true });

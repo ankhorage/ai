@@ -51,8 +51,7 @@ export async function addMcpAsync(
 
 /*** Generate a provider-native MCP candidate without executing remote code. */
 async function buildCandidate(root: string, agent: AgentId, name: string, url: string): Promise<McpCandidate> {
-  const path = agent === 'claude-code' ? '.mcp.json' : agent === 'cursor' ? '.cursor/mcp.json' :
-    agent === 'codex' ? '.codex/config.toml' : '.gemini/settings.json';
+  const path = resolveConfigPath(agent);
   const target = await assertSafePathAsync(root, path);
   const before = await readIfPresent(target);
   if (agent === 'codex') {
@@ -64,7 +63,7 @@ async function buildCandidate(root: string, agent: AgentId, name: string, url: s
   if (!record(config)) throw new Error('Invalid object in ' + path);
   const existing = config.mcpServers;
   if (existing !== undefined && !record(existing)) throw new Error('Invalid mcpServers in ' + path);
-  const servers = existing === undefined ? {} : existing;
+  const servers = existing ?? {};
   if (Object.hasOwn(servers, name)) throw new Error('MCP server already exists in ' + path + ': ' + name);
   const entry = agent === 'gemini' ? { httpUrl: url } : agent === 'claude-code' ? { type: 'http', url } : { url };
   return {
@@ -85,4 +84,14 @@ async function readIfPresent(path: string): Promise<string | null> {
 /*** Narrow parsed JSON to a plain object. */
 function record(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/*** Resolve only the known native config path for each provider. */
+function resolveConfigPath(agent: AgentId): string {
+  switch (agent) {
+    case 'codex': return '.codex/config.toml';
+    case 'claude-code': return '.mcp.json';
+    case 'cursor': return '.cursor/mcp.json';
+    case 'gemini': return '.gemini/settings.json';
+  }
 }
