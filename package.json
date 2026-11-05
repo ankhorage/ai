@@ -1,0 +1,313 @@
+{
+  "name": "@ankhorage/ai",
+  "version": "0.1.0",
+  "description": "Provider-aware agentic development setup and workflows for Ankhorage projects.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "homepage": "https://github.com/ankhorage/ai#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ankhorage/ai.git"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./cli": {
+      "types": "./dist/cli/index.d.ts",
+      "import": "./dist/cli/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "ankhorage-ai": "./dist/cli/bin.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "docs"
+  ],
+  "ankh": {
+    "category": "ai",
+    "provider": "./dist/cli/index.js",
+    "capabilities": [
+      {
+        "id": "ai.init",
+        "owner": "@ankhorage/ai",
+        "access": [
+          "invoke"
+        ],
+        "binding": {
+          "kind": "action",
+          "bindableAs": [
+            "target"
+          ]
+        },
+        "label": "AI init",
+        "description": "Ankhorage AI init command"
+      },
+      {
+        "id": "ai.sync",
+        "owner": "@ankhorage/ai",
+        "access": [
+          "invoke"
+        ],
+        "binding": {
+          "kind": "action",
+          "bindableAs": [
+            "target"
+          ]
+        },
+        "label": "AI sync",
+        "description": "Ankhorage AI sync command"
+      },
+      {
+        "id": "ai.status",
+        "owner": "@ankhorage/ai",
+        "access": [
+          "invoke"
+        ],
+        "binding": {
+          "kind": "action",
+          "bindableAs": [
+            "target"
+          ]
+        },
+        "label": "AI status",
+        "description": "Ankhorage AI status command"
+      },
+      {
+        "id": "ai.doctor",
+        "owner": "@ankhorage/ai",
+        "access": [
+          "invoke"
+        ],
+        "binding": {
+          "kind": "action",
+          "bindableAs": [
+            "target"
+          ]
+        },
+        "label": "AI doctor",
+        "description": "Ankhorage AI doctor command"
+      },
+      {
+        "id": "ai.plan",
+        "owner": "@ankhorage/ai",
+        "access": [
+          "invoke"
+        ],
+        "binding": {
+          "kind": "action",
+          "bindableAs": [
+            "target"
+          ]
+        },
+        "label": "AI plan",
+        "description": "Ankhorage AI plan command"
+      },
+      {
+        "id": "ai.execute",
+        "owner": "@ankhorage/ai",
+        "access": [
+          "invoke"
+        ],
+        "binding": {
+          "kind": "action",
+          "bindableAs": [
+            "target"
+          ]
+        },
+        "label": "AI execute",
+        "description": "Ankhorage AI execute command"
+      },
+      {
+        "id": "ai.review",
+        "owner": "@ankhorage/ai",
+        "access": [
+          "invoke"
+        ],
+        "binding": {
+          "kind": "action",
+          "bindableAs": [
+            "target"
+          ]
+        },
+        "label": "AI review",
+        "description": "Ankhorage AI review command"
+      },
+      {
+        "id": "ai.fix",
+        "owner": "@ankhorage/ai",
+        "access": [
+          "invoke"
+        ],
+        "binding": {
+          "kind": "action",
+          "bindableAs": [
+            "target"
+          ]
+        },
+        "label": "AI fix",
+        "description": "Ankhorage AI fix command"
+      },
+      {
+        "id": "ai.ship",
+        "owner": "@ankhorage/ai",
+        "access": [
+          "invoke"
+        ],
+        "binding": {
+          "kind": "action",
+          "bindableAs": [
+            "target"
+          ]
+        },
+        "label": "AI ship",
+        "description": "Ankhorage AI ship command"
+      },
+      {
+        "id": "ai.discuss",
+        "owner": "@ankhorage/ai",
+        "access": [
+          "invoke"
+        ],
+        "binding": {
+          "kind": "action",
+          "bindableAs": [
+            "target"
+          ]
+        },
+        "label": "AI discuss",
+        "description": "Ankhorage AI discuss command"
+      },
+      {
+        "id": "ai.agents",
+        "owner": "@ankhorage/ai",
+        "access": [
+          "invoke"
+        ],
+        "binding": {
+          "kind": "action",
+          "bindableAs": [
+            "target"
+          ]
+        },
+        "label": "AI agents",
+        "description": "Ankhorage AI agents command"
+      },
+      {
+        "id": "ai.skills",
+        "owner": "@ankhorage/ai",
+        "access": [
+          "invoke"
+        ],
+        "binding": {
+          "kind": "action",
+          "bindableAs": [
+            "target"
+          ]
+        },
+        "label": "AI skills",
+        "description": "Ankhorage AI skills command"
+      },
+      {
+        "id": "ai.mcp",
+        "owner": "@ankhorage/ai",
+        "access": [
+          "invoke"
+        ],
+        "binding": {
+          "kind": "action",
+          "bindableAs": [
+            "target"
+          ]
+        },
+        "label": "AI mcp",
+        "description": "Ankhorage AI mcp command"
+      },
+      {
+        "id": "ai.plugins",
+        "owner": "@ankhorage/ai",
+        "access": [
+          "invoke"
+        ],
+        "binding": {
+          "kind": "action",
+          "bindableAs": [
+            "target"
+          ]
+        },
+        "label": "AI plugins",
+        "description": "Ankhorage AI plugins command"
+      },
+      {
+        "id": "ai.hooks",
+        "owner": "@ankhorage/ai",
+        "access": [
+          "invoke"
+        ],
+        "binding": {
+          "kind": "action",
+          "bindableAs": [
+            "target"
+          ]
+        },
+        "label": "AI hooks",
+        "description": "Ankhorage AI hooks command"
+      },
+      {
+        "id": "ai.cheatsheet",
+        "owner": "@ankhorage/ai",
+        "access": [
+          "invoke"
+        ],
+        "binding": {
+          "kind": "action",
+          "bindableAs": [
+            "target"
+          ]
+        },
+        "label": "AI cheatsheet",
+        "description": "Ankhorage AI cheatsheet command"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "bunx tsc -p tsconfig.build.json",
+    "check-types": "bunx tsc --noEmit -p tsconfig.json",
+    "typecheck": "bun run check-types",
+    "test": "bun test",
+    "lint": "ankhorage-eslint . --max-warnings=0",
+    "knip:check": "ankhorage-knip",
+    "format": "ankhorage-prettier --write .",
+    "format:check": "ankhorage-prettier --check .",
+    "changeset": "ankhorage-changeset",
+    "changeset:status": "ankhorage-changeset status --since=origin/main",
+    "docs": "bunx @ankhorage/paradox",
+    "version-packages": "ankhorage-changeset version"
+  },
+  "dependencies": {
+    "@ankhorage/project-detector": "^0.3.5",
+    "yaml": "^2.9.1"
+  },
+  "peerDependencies": {
+    "@ankhorage/ankh": "^0.13.3"
+  },
+  "devDependencies": {
+    "@ankhorage/ankh": "^0.13.3",
+    "@ankhorage/devtools": "^2.4.1",
+    "@ankhorage/paradox": "^0.3.6",
+    "@types/bun": "^1.4.2",
+    "@types/node": "^26.6.6",
+    "typescript": "^6.0.3"
+  },
+  "packageManager": "bun@1.4.2"
+}
