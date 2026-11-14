@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "kind": "tooling",
+  "title": "Ankhorage AI",
+  "summary": "Provider-aware tooling for previewing, applying, inspecting, and rolling back agentic development setup.",
+  "purpose": "Give standalone projects a controlled CLI for managed AI artifacts and development workflows without silently installing or trusting external agents, hooks, plugins, or MCP servers.",
+  "domain": "agentic development tooling",
+  "responsibilities": [
+    "Build and apply repository-managed AI configuration artifacts.",
+    "Inspect status and roll back managed setup changes.",
+    "Expose planning, execution, review, fixing, shipping, discussion, and setup workflows through Ankh CLI capabilities.",
+    "Catalog supported agents, skills, hooks, plugins, and MCP configuration for explicit user selection."
+  ],
+  "boundaries": [
+    "Does not silently install or trust providers, hooks, plugins, agents, or MCP servers.",
+    "Does not own the external providers it configures.",
+    "Does not modify files outside the artifacts recorded as managed by this package."
+  ],
+  "audience": [
+    "Developers preparing Ankhorage or standalone repositories for agent-assisted workflows.",
+    "Automation invoking preview-first AI setup and inspection commands."
+  ],
+  "useCases": [
+    "Preview and initialize managed AI project files.",
+    "Synchronize or roll back previously managed artifacts.",
+    "Inspect configuration health before enabling an agent workflow.",
+    "Discover available agent, skill, plugin, hook, or MCP setup options."
+  ],
+  "architecture": {
+    "role": "Tooling package with deterministic managed-artifact policy behind CLI delivery commands.",
+    "invariants": [
+      "Setup remains preview-first and changes only package-owned managed artifacts.",
+      "Execution and external integrations remain opt-in and explicitly configured."
+    ]
+  },
+  "constraints": {
+    "platforms": [
+      "Node.js 24-compatible runtimes with Bun for the managed command workflow."
+    ],
+    "security": [
+      "External hooks, plugins, MCP servers, and agent execution require explicit trusted configuration."
+    ]
+  }
+}
