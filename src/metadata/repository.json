@@ -34,9 +34,7 @@
     ]
   },
   "constraints": {
-    "platforms": [
-      "Node.js 24-compatible runtimes with Bun for the managed command workflow."
-    ],
+    "platforms": ["Node.js 24-compatible runtimes with Bun for the managed command workflow."],
     "security": [
       "External hooks, plugins, MCP servers, and agent execution require explicit trusted configuration."
     ]
